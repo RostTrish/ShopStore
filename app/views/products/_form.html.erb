@@ -1,0 +1,99 @@
+<%= form_with model: @product, local: true do |form| %>
+
+  <% if @product.errors.any? %>
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        <% @product.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- Назва -->
+  <div class="mb-3">
+    <%= form.label :name, "Назва товару" %>
+    <%= form.text_field :name, class: "form-control" %>
+  </div>
+
+  <!-- Опис -->
+  <div class="mb-3">
+    <%= form.label :description, "Опис" %>
+    <%= form.text_area :description, rows: 4, class: "form-control" %>
+  </div>
+
+  <!-- Ціна -->
+  <div class="mb-3">
+    <%= form.label :price, "Ціна (грн)" %>
+    <%= form.number_field :price, step: 0.01, class: "form-control" %>
+  </div>
+
+  <!-- Фото -->
+  <div class="mb-3">
+    <%= form.label :images, "Додати фото (можна декілька)" %>
+    <%= form.file_field :images,
+          multiple: true,
+          accept: "image/png,image/jpg,image/jpeg",
+          class: "form-control" %>
+    <small class="text-muted">
+      Нові фото буде додано до існуючих
+    </small>
+  </div>
+
+  <% if @product.images.attached? %>
+    <div class="mb-3">
+      <p class="fw-bold">Поточні фото:</p>
+      <div class="d-flex flex-wrap gap-3">
+        <% @product.images.each do |image| %>
+          <div class="text-center">
+            <%= image_tag image.variant(resize_to_fill: [120, 90]),
+                  class: "img-thumbnail mb-1" %>
+
+            <%= link_to "✕",
+                  destroy_image_product_path(@product, image_id: image.id),
+                  data: {
+                    turbo_method: :delete,
+                    turbo_confirm: "Видалити це фото?"
+                  },
+                  class: "btn btn-sm btn-outline-danger" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- ⚙️ ХАРАКТЕРИСТИКИ -->
+  <hr>
+  <h5 class="mb-3">Характеристики товару</h5>
+
+  <%= form.fields_for :product_properties do |pp| %>
+    <div class="row mb-2 align-items-end">
+      <div class="col-md-5">
+        <%= pp.text_field :name,
+              placeholder: "Назва (напр. Матеріал)",
+              class: "form-control" %>
+      </div>
+
+      <div class="col-md-5">
+        <%= pp.text_field :value,
+              placeholder: "Значення (напр. 100% бавовна)",
+              class: "form-control" %>
+      </div>
+
+      <div class="col-md-2">
+        <div class="form-check">
+          <%= pp.check_box :_destroy, class: "form-check-input" %>
+          <%= pp.label :_destroy, "Видалити", class: "form-check-label" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <small class="text-muted">
+    Порожні характеристики можна залишати — вони не збережуться
+  </small>
+
+  <%= form.submit "Зберегти товар",
+        class: "btn btn-success w-100 mt-4" %>
+
+<% end %>

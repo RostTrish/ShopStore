@@ -1,0 +1,94 @@
+<div class="container mt-5">
+  <h2 class="mb-4">🛒 Корзина</h2>
+
+  <% if session[:cart].blank? %>
+    <div class="alert alert-info">
+      Корзина порожня
+    </div>
+
+    <%= link_to "Повернутися до каталогу",
+          products_path,
+          class: "btn btn-primary" %>
+
+  <% else %>
+
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Товар</th>
+          <th>Ціна</th>
+          <th style="width: 150px;">Кількість</th>
+          <th>Сума</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% total = 0 %>
+
+        <% @cart_items.each do |product| %>
+          <% quantity = session[:cart][product.id.to_s] %>
+          <% sum = product.price * quantity %>
+          <% total += sum %>
+
+          <tr>
+            <td>
+              <strong><%= product.name %></strong>
+            </td>
+
+            <td>
+              <%= number_to_currency(product.price, unit: "₴") %>
+            </td>
+
+            <td>
+              <%= form_with url: update_cart_path(product),
+                    method: :patch,
+                    local: true do %>
+
+                <%= number_field_tag :quantity,
+                      quantity,
+                      min: 1,
+                      class: "form-control mb-1" %>
+
+                <%= submit_tag "Оновити",
+                      class: "btn btn-sm btn-outline-primary w-100" %>
+              <% end %>
+            </td>
+
+            <td>
+              <%= number_to_currency(sum, unit: "₴") %>
+            </td>
+
+            <td>
+              <%= button_to "✕",
+                    remove_cart_path(product),
+                    method: :delete,
+                    class: "btn btn-sm btn-outline-danger" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+
+      <tfoot>
+        <tr>
+          <th colspan="3" class="text-end">Разом:</th>
+          <th colspan="2">
+            <%= number_to_currency(total, unit: "₴") %>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="d-flex gap-3">
+      <%= link_to "Продовжити покупки",
+            products_path,
+            class: "btn btn-secondary" %>
+
+      <%= link_to "Оформити замовлення",
+        new_order_path,
+        class: "btn btn-success" %>
+
+    </div>
+
+  <% end %>
+</div>

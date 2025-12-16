@@ -1,0 +1,90 @@
+<div class="container mt-5">
+
+  <h1 class="text-primary mb-4 text-center">Каталог товарів</h1>
+
+  <!-- 🔍 ФІЛЬТРИ -->
+  <%= form_with url: products_path,
+                method: :get,
+                local: true,
+                class: "row g-3 mb-4 align-items-end" do %>
+
+    <!-- Пошук за назвою -->
+    <div class="col-md-6">
+      <%= label_tag :q, "Пошук за назвою", class: "form-label" %>
+      <%= text_field_tag :q,
+            params[:q],
+            placeholder: "Введіть назву товару",
+            class: "form-control" %>
+    </div>
+
+    <!-- Сортування за ціною -->
+    <div class="col-md-4">
+      <%= label_tag :price, "Сортування за ціною", class: "form-label" %>
+      <%= select_tag :price,
+            options_for_select(
+              [
+                ["За зростанням ціни", "asc"],
+                ["За спаданням ціни", "desc"]
+              ],
+              params[:price]
+            ),
+            class: "form-select" %>
+    </div>
+
+    <!-- Кнопка -->
+    <div class="col-md-2">
+      <%= submit_tag "Фільтрувати",
+            class: "btn btn-primary w-100" %>
+    </div>
+
+  <% end %>
+
+  <% if @products.any? %>
+    <div class="row">
+      <% @products.each do |product| %>
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+
+            <!-- Фото -->
+            <% if product.images.attached? %>
+              <%= image_tag product.images.first.variant(
+                    resize_to_fill: [400, 300]
+                  ),
+                  class: "card-img-top",
+                  alt: product.name %>
+            <% else %>
+              <div class="d-flex align-items-center justify-content-center bg-light"
+                   style="height: 300px;">
+                <span class="text-muted">Немає фото</span>
+              </div>
+            <% end %>
+
+            <!-- Контент -->
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title"><%= product.name %></h5>
+
+              <!-- 🔹 Обрізаний опис -->
+              <p class="card-text text-muted flex-grow-1">
+                <%= truncate(product.description.to_s, length: 120) %>
+              </p>
+
+              <p class="fw-bold mb-3">
+                <%= number_to_currency(product.price, unit: "₴") %>
+              </p>
+
+              <%= link_to "Переглянути",
+                    product_path(product),
+                    class: "btn btn-primary mt-auto w-100" %>
+            </div>
+
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted text-center mt-4">
+      Нічого не знайдено за заданими умовами.
+    </p>
+  <% end %>
+
+</div>

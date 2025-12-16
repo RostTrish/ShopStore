@@ -1,0 +1,133 @@
+<div class="container mt-5">
+
+  <%= link_to "← Назад до списку", products_path, class: "btn btn-secondary mb-4" %>
+
+  <div class="card shadow p-4">
+
+    <h2 class="text-primary mb-4"><%= @product.name %></h2>
+
+    <!-- 🖼 ГОЛОВНЕ ФОТО -->
+    <% if @product.images.attached? %>
+      <div class="mb-4 text-center">
+        <%= image_tag @product.images.first.variant(
+              resize_to_fill: [800, 500]
+            ),
+            class: "img-fluid rounded shadow",
+            alt: @product.name %>
+      </div>
+    <% end %>
+
+    <!-- 🖼 ГАЛЕРЕЯ -->
+    <% if @product.images.size > 1 %>
+      <div class="d-flex flex-wrap gap-3 mb-4 justify-content-center">
+        <% @product.images.drop(1).each do |image| %>
+          <%= image_tag image.variant(resize_to_fill: [150, 100]),
+                class: "img-thumbnail",
+                alt: @product.name %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- 💰 ЦІНА + КУПИТИ -->
+    <div class="d-flex align-items-center gap-4 mb-4">
+      <h4 class="fw-bold mb-0">
+        <%= number_to_currency(@product.price, unit: "₴") %>
+      </h4>
+
+      <%= form_with url: add_cart_path(product_id: @product.id),
+                    method: :post,
+                    local: true,
+                    class: "d-flex align-items-center gap-2" do %>
+
+        <%= number_field_tag :quantity, 1,
+              min: 1,
+              class: "form-control",
+              style: "width: 90px;" %>
+
+        <%= submit_tag "Купити", class: "btn btn-success" %>
+      <% end %>
+    </div>
+
+    <!-- 📝 ОПИС -->
+    <% if @product.description.present? %>
+      <p class="text-muted fs-5"><%= @product.description %></p>
+    <% end %>
+
+    <!-- ⚙️ ХАРАКТЕРИСТИКИ -->
+    <% if @product.product_properties.any? %>
+      <hr>
+      <h5 class="mb-3">Характеристики</h5>
+
+      <table class="table table-bordered">
+        <tbody>
+          <% @product.product_properties.each do |prop| %>
+            <tr>
+              <th style="width: 40%"><%= prop.name %></th>
+              <td><%= prop.value %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <!-- 🔧 КНОПКИ КЕРУВАННЯ -->
+    <% if user_signed_in? && (@product.user == current_user || current_user.admin?) %>
+      <div class="mt-4 d-flex gap-3">
+        <%= link_to "Редагувати",
+              edit_product_path(@product),
+              class: "btn btn-warning" %>
+
+        <%= button_to "Видалити",
+              product_path(@product),
+              method: :delete,
+              data: { turbo_confirm: "Ви впевнені?" },
+              class: "btn btn-danger" %>
+      </div>
+    <% end %>
+
+    <!-- 💬 КОМЕНТАРІ -->
+    <hr class="my-4">
+    <h4>Коментарі</h4>
+
+    <% @product.comments.order(created_at: :desc).each do |comment| %>
+      <div class="border rounded p-3 mb-2">
+        <strong><%= comment.user.nickname %></strong>
+        <small class="text-muted">
+          · <%= comment.created_at.strftime("%d.%m.%Y %H:%M") %>
+        </small>
+
+        <p class="mb-1 mt-2"><%= comment.body %></p>
+
+        <% if user_signed_in? &&
+              (comment.user == current_user || current_user.admin?) %>
+          <%= button_to "Видалити",
+                product_comment_path(@product, comment),
+                method: :delete,
+                data: { turbo_confirm: "Видалити коментар?" },
+                class: "btn btn-sm btn-outline-danger" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- ✍️ ФОРМА КОМЕНТАРЯ -->
+    <% if user_signed_in? %>
+      <div class="mt-4">
+        <%= form_with model: [@product, Comment.new], local: true do |f| %>
+          <div class="mb-3">
+            <%= f.text_area :body,
+                  rows: 3,
+                  placeholder: "Напишіть коментар...",
+                  class: "form-control" %>
+          </div>
+
+          <%= f.submit "Додати коментар", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-muted mt-3">
+        Щоб залишити коментар — <%= link_to "увійдіть", new_user_session_path %>
+      </p>
+    <% end %>
+
+  </div>
+</div>

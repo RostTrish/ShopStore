@@ -1,0 +1,21 @@
+<div class="container mt-5">
+  <h2 class="mb-4">🧾 Оформлення замовлення</h2>
+
+  <%= form_with model: @order, local: true do |f| %>
+
+    <h5 class="mt-3">🚚 Доставка</h5>
+    <div class="mb-3">
+      <%= f.radio_button :delivery_method, :nova_poshta %> Нова Пошта<br>
+      <%= f.radio_button :delivery_method, :ukrposhta %> Укрпошта<br>
+      <%= f.radio_button :delivery_method, :pickup %> Самовивіз
+    </div>
+
+    <h5 class="mt-3">💳 Оплата</h5>
+    <div class="mb-4">
+      <%= f.radio_button :payment_method, :cash_on_delivery %> Готівка при отриманні<br>
+      <%= f.radio_button :payment_method, :card %> Картка
+    </div>
+
+    <%= f.submit "Підтвердити замовлення", class: "btn btn-primary" %>
+  <% end %>
+</div>
