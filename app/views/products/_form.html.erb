@@ -10,37 +10,30 @@
     </div>
   <% end %>
 
-  <!-- Назва -->
   <div class="mb-3">
     <%= form.label :name, "Назва товару" %>
     <%= form.text_field :name, class: "form-control" %>
   </div>
 
-  <!-- Опис -->
   <div class="mb-3">
     <%= form.label :description, "Опис" %>
     <%= form.text_area :description, rows: 4, class: "form-control" %>
   </div>
 
-  <!-- Ціна -->
   <div class="mb-3">
     <%= form.label :price, "Ціна (грн)" %>
     <%= form.number_field :price, step: 0.01, class: "form-control" %>
   </div>
 
-  <!-- Фото -->
   <div class="mb-3">
     <%= form.label :images, "Додати фото (можна декілька)" %>
     <%= form.file_field :images,
           multiple: true,
           accept: "image/png,image/jpg,image/jpeg",
           class: "form-control" %>
-    <small class="text-muted">
-      Нові фото буде додано до існуючих
-    </small>
   </div>
 
-  <% if @product.images.attached? %>
+  <% if @product.persisted? && @product.images.attached? %>
     <div class="mb-3">
       <p class="fw-bold">Поточні фото:</p>
       <div class="d-flex flex-wrap gap-3">
@@ -62,22 +55,17 @@
     </div>
   <% end %>
 
-  <!-- ⚙️ ХАРАКТЕРИСТИКИ -->
   <hr>
   <h5 class="mb-3">Характеристики товару</h5>
 
   <%= form.fields_for :product_properties do |pp| %>
     <div class="row mb-2 align-items-end">
       <div class="col-md-5">
-        <%= pp.text_field :name,
-              placeholder: "Назва (напр. Матеріал)",
-              class: "form-control" %>
+        <%= pp.text_field :name, placeholder: "Назва", class: "form-control" %>
       </div>
 
       <div class="col-md-5">
-        <%= pp.text_field :value,
-              placeholder: "Значення (напр. 100% бавовна)",
-              class: "form-control" %>
+        <%= pp.text_field :value, placeholder: "Значення", class: "form-control" %>
       </div>
 
       <div class="col-md-2">
@@ -88,10 +76,6 @@
       </div>
     </div>
   <% end %>
-
-  <small class="text-muted">
-    Порожні характеристики можна залишати — вони не збережуться
-  </small>
 
   <%= form.submit "Зберегти товар",
         class: "btn btn-success w-100 mt-4" %>

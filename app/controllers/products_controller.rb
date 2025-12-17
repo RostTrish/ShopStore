@@ -1,6 +1,5 @@
 class ProductsController < ApplicationController
   before_action :authenticate_user!, except: %i[index show]
-
   before_action :set_product, only: %i[
     show edit update destroy destroy_image
   ]
@@ -15,24 +14,21 @@ class ProductsController < ApplicationController
 
   def new
     @product = Product.new
-    # ➕ одна порожня характеристика для форми
     @product.product_properties.build
   end
 
   def create
-    @product = Product.new(product_params)
+    @product = current_user.products.build(product_params) # ✅ КЛЮЧОВИЙ РЯДОК
 
     if @product.save
       redirect_to @product, notice: "Товар успішно створено."
     else
-      # якщо валідація впала — знову показуємо поле характеристики
       @product.product_properties.build if @product.product_properties.empty?
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    # ➕ завжди додаємо 1 порожню характеристику
     @product.product_properties.build
   end
 
@@ -41,11 +37,8 @@ class ProductsController < ApplicationController
 
     if @product.update(product_params.except(:images))
       @product.images.attach(new_images) if new_images.present?
-
-      redirect_to edit_product_path(@product),
-                  notice: "Товар оновлено."
+      redirect_to edit_product_path(@product), notice: "Товар оновлено."
     else
-      # якщо помилка — щоб форма не була порожня
       @product.product_properties.build
       render :edit, status: :unprocessable_entity
     end
@@ -59,9 +52,7 @@ class ProductsController < ApplicationController
   def destroy_image
     image = @product.images.find(params[:image_id])
     image.purge
-
-    redirect_to edit_product_path(@product),
-                notice: "Фото видалено."
+    redirect_to edit_product_path(@product), notice: "Фото видалено."
   end
 
   private
